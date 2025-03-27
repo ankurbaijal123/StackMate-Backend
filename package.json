@@ -1,0 +1,15 @@
+{
+  "name": "stackmate",
+  "version": "1.0.0",
+  "description": "Tinder for developers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node.js",
+    "javascript"
+  ],
+  "author": "Ankur Baijal",
+  "license": "ISC"
+}
