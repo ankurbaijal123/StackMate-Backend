@@ -1,0 +1,3 @@
+- Order of routes matter a lot
+- Postman app
+- make a workspace and test api call
