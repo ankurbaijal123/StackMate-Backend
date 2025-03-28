@@ -10,6 +10,9 @@ app.use("/hello",(req, res) =>{
     res.send("Hello from Ankur");
 })
 
+app.use("/ankur",(req, res) =>{
+    res.send("Hello from Ankur Baijal");
+})
 app.listen(3000, () =>{
     console.log("Server Started")
 })
