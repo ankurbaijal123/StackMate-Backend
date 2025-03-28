@@ -11,5 +11,8 @@
     "javascript"
   ],
   "author": "Ankur Baijal",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
 }
