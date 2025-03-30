@@ -2,33 +2,26 @@ const express = require("express");
 
 const app = express();
 
-/* app.use("/user", (req,res)=>{
-    res.send("Hahahahahahahah")
-}) */
-app.get(
-  "/user",
-  (req, res, next) => {
-    console.log("user api called");
-    next();
-    //res.send("user data here")
-  },
-  (req, res, next) => {
-    //res.send("user 2 data")
-    console.log("user 2 api called");
-    next();
-  },
-  (req, res, next) => {
-    //res.send("user 3 data")
-    console.log("user 3 api called");
-    next();
-  },
-  (req, res, next) => {
-    //res.send("user 4 data")
-    console.log("user 4 api called");
-    next()
-  }    
-); // code is executed line by line
+const {adminAuth, userAuth} = require("./middlewares/auth")
 
+app.use("/admin", adminAuth)
+
+
+app.post("/user/login", (req, res)=>{
+    res.send("Logged innnn")
+})
+
+app.use("/user", userAuth, (req, res)=>{
+    res.send("All Data sent")
+})
+
+app.get("/admin/getAllData", (req, res)=>{
+    res.send("All Data sent")
+})
+
+app.get("/admin/deleteUser", (req, res)=>{
+    res.send("User Deleted")
+})
 app.listen(3000, () => {
   console.log("Server Started at 3000.....");
 });
