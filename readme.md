@@ -8,3 +8,8 @@
 
 - Middleware
 - How JS basically handles request behind the scenes
+
+- Connect with your cluster in db (MongoAtlas)
+- Install mongoose
+- Connect your app with your database "Connection url + (/StackMate)"
+- Call your ConnectDB func and connect todatabase 

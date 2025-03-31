@@ -1,27 +1,110 @@
 const express = require("express");
-
+const connectDB = require("./src/config/database");
 const app = express();
+const User = require("./src/models/user");
 
-const {adminAuth, userAuth} = require("./middlewares/auth")
+app.use(express.json());
 
-app.use("/admin", adminAuth)
+connectDB()
+  .then(() => {
+    console.log("Database connected sucessesfully.....");
+    app.listen(3000, () => {
+      console.log("Server Started at 3000.....");
+    });
+  })
+  .catch((err) => {
+    console.error("Database cannot be connected");
+  });
 
+app.post("/signUp", async (req, res) => {
+  console.log(req.body);
+//   {
+//     "firstName": "Ankur",
+//     "lastName":"Baijal",
+//     "emailId": "ankur.baijal@gmail.com",
+//     "password":"ankur@123",
+//     "age": 21, b 
+//     "gender": "Male"
+// }
 
-app.post("/user/login", (req, res)=>{
-    res.send("Logged innnn")
-})
-
-app.use("/user", userAuth, (req, res)=>{
-    res.send("All Data sent")
-})
-
-app.get("/admin/getAllData", (req, res)=>{
-    res.send("All Data sent")
-})
-
-app.get("/admin/deleteUser", (req, res)=>{
-    res.send("User Deleted")
-})
-app.listen(3000, () => {
-  console.log("Server Started at 3000.....");
+  const user = new User(req.body);
+  try {
+    await user.save();
+    res.send("User created");
+  } catch (err) {
+    res.status(400).send("User not added");
+  }
 });
+
+//get user by email
+app.get("/user", async (req, res) => {
+    try{  
+        const userEmail = req.body.emailId
+        const user = await User.findById("67ea2d9347095f23793c6198")
+        if(user.length  === 0){
+            res.status(404).send("User not found");
+        }
+        else{
+            res.send(user)
+        }
+        
+    }
+    catch (err){
+        res.status(400).send("Something went wrong");
+    }
+})
+
+app.delete("/user", async (req, res) => {
+    try{  
+        const userId = req.body.userId
+        const user = await User.findByIdAndDelete(userId)
+        if(user.length  === 0){
+            res.status(404).send("User not found");
+        }
+        else{
+            res.send("User deleted with id")
+        }
+        
+    }
+    catch (err){
+        res.status(400).send("Something went wrong");
+    }
+})
+
+
+app.patch("/user", async (req, res) => {
+    try{  
+        const userId = req.body.userId
+        const data = req.body
+        const user = await User.findByIdAndUpdate(userId, data, 
+            {returnDocument: "before"}
+        )
+        if(user.length  === 0){
+            res.status(404).send("User not found");
+        }
+        else{
+            console.log(user)
+            res.send("User data updated")
+        }
+        
+    }
+    catch (err){
+        res.status(400).send("Something went wrong");
+    }
+})
+
+app.get("/feed", async (req, res)=>{
+    try{  
+        const users = await User.find({})
+        if(users.length === 0){
+            res.status(404).send("User not found");
+        }
+        else{
+            res.send(users)
+        }
+        
+    }
+    catch (err){
+        res.status(400).send("Something went wrong");
+    }
+})
