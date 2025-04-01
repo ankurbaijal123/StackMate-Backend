@@ -12,4 +12,6 @@
 - Connect with your cluster in db (MongoAtlas)
 - Install mongoose
 - Connect your app with your database "Connection url + (/StackMate)"
-- Call your ConnectDB func and connect todatabase 
+- Call your ConnectDB func and connect todatabase
+
+**NEVER TRUST req.body **
