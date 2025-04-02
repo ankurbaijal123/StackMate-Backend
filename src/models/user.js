@@ -32,7 +32,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minLength: 6,
-      maxLength: 20,
       validate(value) {
           if (!validator.isStrongPassword(value)) {
             throw new Error("Password must be 6-20 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character.");
