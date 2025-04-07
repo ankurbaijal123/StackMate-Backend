@@ -15,3 +15,31 @@
 - Call your ConnectDB func and connect todatabase
 
 **NEVER TRUST req.body **
+
+** ALL THE API'S WE NEED FOR STACKMATE**
+
+** Auth Router **
+- POST /signup
+- POST /login
+- POST /logout
+
+
+** Profile Router **
+- GET /profile
+- Patch /profile/edit
+- Patch /profile/password
+
+** ConnectionRequest Router **
+- POST /request/send/intrested/:userId
+- POST /request/send/ignored/:userId
+- POST /request/review/accepted/:requestId
+- POST /request/review/rejected/:requestId
+
+** User Router **
+- GET /user/connection
+- GET /user/request/received
+- GET /user/feed - Gets you the profile of other users.
+
+Status: ignore, intrested, accepted, rejected
+
+
