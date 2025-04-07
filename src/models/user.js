@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-const validator = require("validator")
+const validator = require("validator");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -21,21 +23,23 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minLength: 3,
       maxLength: 50,
-     validate(value) {
-          if (!validator.isEmail(value)){
-            throw new Error("Invalid email format : " + value);
-          }
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid email format : " + value);
+        }
       },
     },
-   
+
     password: {
       type: String,
       required: true,
       minLength: 6,
       validate(value) {
-          if (!validator.isStrongPassword(value)) {
-            throw new Error("Password must be 6-20 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character.");
-          }
+        if (!validator.isStrongPassword(value)) {
+          throw new Error(
+            "Password must be 6-20 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character."
+          );
+        }
       },
     },
 
@@ -72,7 +76,7 @@ const userSchema = new mongoose.Schema(
       validate(value) {
         if (value.length > 250) {
           throw new Error("About section must be 250 characters or less.");
-        }  
+        }
       },
     },
 
@@ -90,6 +94,20 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign({ _id: user._id }, "STACK@MATE#0425", {
+    expiresIn: "7d",
+  });
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (password) {
+  const user = this;
+  const passwordhash = user.password
+  const isPasswordvalid = await bcrypt.compare(password, passwordhash);
+  return isPasswordvalid;
+}
 // Now create a mongoose Model
 const userModel = mongoose.model("User", userSchema);
 

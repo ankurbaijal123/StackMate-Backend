@@ -1,13 +1,17 @@
 const express = require("express");
 const connectDB = require("./src/config/database");
 const app = express();
-const validator = require("validator")
+const validator = require("validator");
 const User = require("./src/models/user");
 const { validateSignUpData } = require("./src/utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+
+const {userAuth} = require("./src/middlewares/auth")
 
 app.use(express.json());
-
+app.use(cookieParser());
+ 
 connectDB()
   .then(() => {
     console.log("Database connected sucessesfully.....");
@@ -25,7 +29,7 @@ app.post("/signUp", async (req, res) => {
 
     validateSignUpData(req);
 
-    const { firstName, lastName, emailId, password, gender} = req.body;
+    const { firstName, lastName, emailId, password, gender } = req.body;
 
     //Encrypt the password
     const passwordHash = await bcrypt.hash(password, 10);
@@ -47,33 +51,33 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
+app.post("/logIn", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
 
-app.post("/login", async(req, res) =>{
-    try{
-        const {emailId, password} = req.body;
-
-        if(!validator.isEmail(emailId)){
-            throw new Error("Invalid EmailTd")
-        } 
-        const user = await User .findOne({emailId : emailId}) 
-        if(!user){
-            throw new Error("Invalid Credentails")
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password)
-
-        if(isPasswordValid){
-            res.send("Logged in sucessfully, Hi " + user.firstName + " !!")
-        }     
-        else{ 
-            throw new Error("Invalid Credentails")
-        }
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Invalid EmailTd");
     }
-    catch (error){
-        res.status(400).send("ERROR : " + error.message)
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid Credentails");
     }
-})
- 
+
+    const isPasswordValid = await user.validatePassword(password);
+
+    if (isPasswordValid) {
+      const token = await user.getJWT();
+
+      res.cookie("token", token, {expires : new Date(Date.now() + 7 * 3600000)} );
+      res.send("Logged  in sucessfully, Hi " + user.firstName + " !!");
+    } else {
+      throw new Error("Invalid Credentails");
+    }
+  } catch (error) {
+    res.status(400).send("ERROR : " + error.message);
+  }
+});
+
 //get user by email
 app.get("/user", async (req, res) => {
   try {
@@ -88,6 +92,27 @@ app.get("/user", async (req, res) => {
     res.status(400).send("Something went wrong");
   }
 });
+
+app.get("/profile", userAuth, async (req, res) => {
+  // get cookies data
+  try {
+    const user = req.user;
+    //Validate the token
+     res.send(user);
+  } catch (err) {
+    res.status(400).send("ERROR : " + err);
+  }
+});
+
+app.post("/sendConnectionRequest", userAuth, async (req, res, next)=>{
+  try{
+    const user = req.user; 
+    res.send(user.firstName + " Sent a Connection request")
+  }
+  catch(err){
+    res.status(400).send("Error : " + err)
+  }
+}) 
 
 app.delete("/user", async (req, res) => {
   try {
