@@ -3,6 +3,7 @@ const validator = require("validator");
 const User = require("../models/user");
 const { validateSignUpData } = require("../utils/validation");
 const authRouter = express.Router();
+const bcrypt = require("bcrypt")
 
 authRouter.post("/signUp", async (req, res) => {
     try {
@@ -15,7 +16,6 @@ authRouter.post("/signUp", async (req, res) => {
       //Encrypt the password
       const passwordHash = await bcrypt.hash(password, 10);
       // 10-saltrounds, Here salt is a random string
-      console.log(passwordHash);
       //Creating new instance of user model
       const user = new User({
         firstName,
@@ -60,7 +60,9 @@ authRouter.post("/login", async (req, res) => {
   });
 
 authRouter.post("/logout", async (req, res) =>{
-
-})
-
+  
+  res.cookie("token", null, {expires : new Date(Date.now())});
+  res.send("Logged out (Cookie cleared)")
+});
+  
 module.exports = authRouter
