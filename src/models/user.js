@@ -115,7 +115,7 @@ userSchema.methods.validatePassword = async function (password) {
   const user = this;
   const passwordhash = user.password
   const isPasswordvalid = await bcrypt.compare(password, passwordhash);
-  console.log(passwordhash)
+
   return isPasswordvalid;
 }
 // Now create a mongoose Model
