@@ -48,11 +48,12 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 });
 module.exports = userRouter;
 
-userRouter.get("/feed?page=1&limit=10", userAuth, async (req, res) => {
+userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInuser = req.user;
-    const page = parseInt(req.params.page) || 1;
-    const limit = parseInt(req.params.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page-1) * limit;
      
     const connectionRequest = await ConnectionRequest.find({
       $or: [{ toUserId: loggedInuser._id }, { fromUserId: loggedInuser._id }],
@@ -69,7 +70,7 @@ userRouter.get("/feed?page=1&limit=10", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hideUsersFromFeed) } },
         { _id: { $ne: loggedInuser._id } },
       ],
-    }).select(USER_SAVE_DATA).skip((page-1)*limit).limit(limit);    
+    }).select(USER_SAVE_DATA).skip(skip).limit(limit);    
     res.send(users);
   } catch (err) {
     res.status(400).json({ message: err.message });

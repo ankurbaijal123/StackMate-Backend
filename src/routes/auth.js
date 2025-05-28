@@ -26,7 +26,7 @@ authRouter.post("/signUp", async (req, res) => {
       });
   
       await user.save();
-      res.send("User created");
+      res.json({message: "User created"});
     } catch (err) {
       res.status(400).send("ERROR: " + err.message);
     }
@@ -37,7 +37,7 @@ authRouter.post("/login", async (req, res) => {
       const { emailId, password } = req.body;
   
       if (!validator.isEmail(emailId)) {
-        throw new Error("Invalid EmailTd");
+        throw new Error("Invalid EmailTd Format");
       }
       const user = await User.findOne({ emailId: emailId });
       if (!user) {
@@ -50,7 +50,7 @@ authRouter.post("/login", async (req, res) => {
         const token = await user.getJWT();
   
         res.cookie("token", token, {expires : new Date(Date.now() + 7 * 3600000)} );
-        res.send("Logged  in sucessfully, Hi " + user.firstName + " !!");
+        res.json({message : "Logged  in sucessfully, Hi " + user.firstName + " !!", data : user});
       } else {
         throw new Error("Invalid Credentails");
       }
@@ -62,7 +62,7 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", async (req, res) =>{
   
   res.cookie("token", null, {expires : new Date(Date.now())});
-  res.send("Logged out (Cookie cleared)")
+  res.json({message : "Logged out (Cookie cleared) "})
 });
   
 module.exports = authRouter

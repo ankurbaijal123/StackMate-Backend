@@ -78,8 +78,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Learner",
       validate(value) {
-        if (value.length > 250) {
-          throw new Error("About section must be 250 characters or less.");
+        if (value.length > 500) {
+          throw new Error("About section must be 500 characters or less.");
         }
       },
     },
