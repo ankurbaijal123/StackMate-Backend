@@ -42,4 +42,11 @@
 
 Status: ignore, intrested, accepted, rejected
 
+**Sending Emails via SES
+
+- Create an IAM User
+- Give a+Acccess to SAmazonSESFullAccess
+- Amazon SES: Create an Identity 
+- Verify your domain name, verify an email address
+
 

@@ -11,7 +11,7 @@ const userAuth = async (req, res, next) => {
         return res.status(401).json({message: "You are not authorized"})
     }
 
-    const decodedMessage = await jwt.verify(token, "STACK@MATE#0425");
+    const decodedMessage = await jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decodedMessage._id);
     if (!user) {
