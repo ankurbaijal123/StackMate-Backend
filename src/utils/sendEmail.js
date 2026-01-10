@@ -38,7 +38,7 @@ const run = async (subject, body) => {
 
   try {
     const response = await sesClient.send(sendEmailCommand);
-    console.log("✅ Email sent successfully:", response);
+    console.log("Email sent successfully:", response);
     return response;
   } catch (caught) {
     if (caught.name === "MessageRejected") {

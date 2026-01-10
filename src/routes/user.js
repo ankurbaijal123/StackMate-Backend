@@ -7,6 +7,7 @@ const { connection } = require("mongoose");
 const USER_SAVE_DATA = "firstName lastName photoUrl age gender about skills";
 //get all the pending connection request for the logged in user
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
+  console.log(req.user)
   try {
     const loggedInuser = req.user;
     const connectionRequests = await ConnectionRequest.find({

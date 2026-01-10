@@ -10,6 +10,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
     // get cookies data
     try {
       const user = req.user;
+      
       //Validate the token
        res.json({data : user});
     } catch (err) {

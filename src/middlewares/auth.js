@@ -7,13 +7,17 @@ const userAuth = async (req, res, next) => {
 
   try {
     const { token } = req.cookies;
+    
+
     if(!token){
         return res.status(401).json({message: "You are not authorized"})
     }
 
     const decodedMessage = await jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decodedMessage);
 
     const user = await User.findById(decodedMessage._id);
+    console.log("Cookies:", req.cookies);
     if (!user) {
       throw new Error("User does not exist");
     }
