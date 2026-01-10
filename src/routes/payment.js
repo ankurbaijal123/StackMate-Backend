@@ -64,10 +64,12 @@ paymentRouter.post("/payment/webhook", async (req, res) => {
     const payment = await Payment.findOne({orderId: paymentDetails.order_id})
     payment.status = paymentDetails.status
     await payment.save();
-    const user = await user.findOne({_id: payment.userId})
+    const user = await User.findOne({_id: payment.userId})
+    console.log(user)
     user.isPremium = true
     user.membershipType = payment.notes.membershipType 
     await user.save()
+     console.log(user)
 
     // if(req.body.event === "payment.captured"){
          
