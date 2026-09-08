@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
       minLength: 6,
       validate(value) {
         if (!validator.isStrongPassword(value)) {
@@ -102,6 +103,12 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform: (_doc, returnedUser) => {
+        delete returnedUser.password;
+        return returnedUser;
+      },
+    },
   }
 );
 
@@ -112,7 +119,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods.getJWT = async function () {
   const user = this;
-  const token = await jwt.sign({ _id: user._id }, "STACK@MATE#0425", {
+  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
   return token;

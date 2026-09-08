@@ -5,6 +5,14 @@ const { validateSignUpData } = require("../utils/validation");
 const authRouter = express.Router();
 const bcrypt = require("bcrypt")
 
+const isProduction = process.env.NODE_ENV === "production";
+const getCookieOptions = (expires) => ({
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  expires,
+});
+
 authRouter.post("/signUp", async (req, res) => {
     try {
       //Validation of data from user
@@ -29,7 +37,7 @@ authRouter.post("/signUp", async (req, res) => {
       const token = await savedUser.getJWT();
       
   
-      res.cookie("token", token, {expires : new Date(Date.now() + 7 * 3600000)} );
+      res.cookie("token", token, getCookieOptions(new Date(Date.now() + 7 * 24 * 3600000)));
       res.json({message: "User created",
         data: savedUser
       });
@@ -45,7 +53,7 @@ authRouter.post("/login", async (req, res) => {
       if (!validator.isEmail(emailId)) {
         throw new Error("Invalid EmailTd Format");
       }
-      const user = await User.findOne({ emailId: emailId });
+      const user = await User.findOne({ emailId: emailId }).select("+password");
       if (!user) {
         throw new Error("Invalid Credentails");
       }
@@ -55,8 +63,8 @@ authRouter.post("/login", async (req, res) => {
       if (isPasswordValid) {
         const token = await user.getJWT();
   
-        res.cookie("token", token, {expires : new Date(Date.now() + 7 * 3600000)} );
-        res.json({message : "Logged  in sucessfully, Hi " + user.firstName + " !!", data : user});
+        res.cookie("token", token, getCookieOptions(new Date(Date.now() + 7 * 24 * 3600000)));
+        res.json({message : "Logged in successfully, Hi " + user.firstName + " !!", data : user});
       } else {
         throw new Error("Invalid Credentails");
       }
@@ -67,7 +75,7 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.post("/logout", async (req, res) =>{
   
-  res.cookie("token", null, {expires : new Date(Date.now())});
+  res.clearCookie("token", getCookieOptions(new Date(0)));
   res.json({message : "Logged out (Cookie cleared) "})
 });
   
