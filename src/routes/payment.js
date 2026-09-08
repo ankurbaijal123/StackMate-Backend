@@ -48,41 +48,55 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 })
 
 paymentRouter.post("/payment/webhook", async (req, res) => {
- try{
-    console.log("webhook called")
-    const webhookSignature= req.get("X-Razorpay-Signature")
-    const isWebhookValid = validateWebhookSignature(JSON.stringify(req.body), webhookSignature, process.env.WEBHOOK_SECRET);
-    console.log(isWebhookValid)
-    if(!isWebhookValid){
-        return res.status(400).json({msg: "Webhook signature is invalid"})
+  try {
+    const webhookSignature = req.get("X-Razorpay-Signature");
+    const rawBody = req.body.toString("utf8");
+    const isWebhookValid = validateWebhookSignature(
+      rawBody,
+      webhookSignature,
+      process.env.WEBHOOK_SECRET
+    );
+
+    if (!isWebhookValid) {
+      return res.status(400).json({ message: "Webhook signature is invalid" });
     }
- //update the payment status in db
-        //update the user as premium
-        //return success response to razorpay
-    const paymentDetails = req.body.payload.payment.entity
 
-    const payment = await Payment.findOne({orderId: paymentDetails.order_id})
-    payment.status = paymentDetails.status
+    const event = JSON.parse(rawBody);
+
+    // Only a successfully captured payment grants premium access.
+    if (event.event !== "payment.captured") {
+      return res.status(200).json({ received: true });
+    }
+
+    const paymentDetails = event.payload.payment.entity;
+    const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
+
+    if (!payment) {
+      return res.status(404).json({ message: "Payment order not found" });
+    }
+
+    // Razorpay can deliver the same event more than once.
+    if (payment.status === "captured") {
+      return res.status(200).json({ received: true });
+    }
+
+    payment.status = paymentDetails.status;
     await payment.save();
-    const user = await User.findOne({_id: payment.userId})
-    console.log(user)
-    user.isPremium = true
-    user.membershipType = payment.notes.membershipType 
-    await user.save()
-     console.log(user)
 
-    // if(req.body.event === "payment.captured"){
-         
-           
-    // }
-    // else if(req.body.event === "payment.failed"){
-    //     //update the payment status in db
-    // }
+    const user = await User.findById(payment.userId);
+    if (!user) {
+      return res.status(404).json({ message: "Payment user not found" });
+    }
 
- }
- catch(error){    
-    return res.status(500).json({msg: error.message})
- }
+    user.isPremium = true;
+    user.membershipType = payment.notes.membershipType;
+    await user.save();
+
+    return res.status(200).json({ received: true });
+  } catch (error) {
+    console.error("Razorpay webhook error:", error);
+    return res.status(500).json({ message: "Webhook processing failed" });
+  }
 })
 
 paymentRouter.get("/payment/verify", userAuth, async(req,res) => {

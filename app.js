@@ -32,6 +32,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// Razorpay signs the raw request body, so its webhook must be parsed before
+// the application-wide JSON parser runs.
+app.use("/payment/webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 app.use(cookieParser());
 
