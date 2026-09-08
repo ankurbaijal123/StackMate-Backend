@@ -15,12 +15,29 @@ const initializeSocket = require("./src/utils/socket");
 const chatRouter = require("./src/routes/chat");
 require("./src/utils/cronjob")
 
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials : true 
-}))
+const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Requests without an Origin header include health checks and server-to-server calls.
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
@@ -33,8 +50,9 @@ app.use("/", chatRouter)
 connectDB()
   .then(() => {
     console.log("Database connected sucessesfully.....");
-    server.listen(process.env.PORT, () => {
-      console.log("Server Started at 3000.....");
+    const port = process.env.PORT || 3000;
+    server.listen(port, "0.0.0.0", () => {
+      console.log(`Server started on port ${port}`);
     });
   })
   .catch((err) => {

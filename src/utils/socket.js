@@ -7,11 +7,17 @@ const { Chat } = require("../models/chat")
 const getSecretRoomId = (userId, targetUserId) => {
     return crypto.createHash("sha256").update([userId, targetUserId].sort().join("_")).digest("hex")
 }
+const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 const initializeSocket = (server) => {
 
     const io = socket(server, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: allowedOrigins,
+            credentials: true,
         }
     })
     io.on("connection", (socket) => {
@@ -58,4 +64,4 @@ const initializeSocket = (server) => {
         socket.on("disconnect", () => { })
     })
 }
-module.exports = initializeSocket  
+module.exports = initializeSocket;

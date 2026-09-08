@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: stackmate-backend
+    runtime: node
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: DB_CONNECTION_SECRET
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: AWS_ACCESS_KEY
+        sync: false
+      - key: AWS_SECRET_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_SECRET
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
